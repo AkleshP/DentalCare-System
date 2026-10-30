@@ -95,7 +95,7 @@ XAMPP provides the Apache web server and PHP required to run the application.
 Clone the GitHub repository using the following command:
 
 ```bash
-git clone https://github.com/your-username/your-repository-name.git
+git clone https://github.com/AkleshP/DentalCare-System.git
 ```
 
 Alternatively, download the project as a ZIP file from GitHub and extract it.
