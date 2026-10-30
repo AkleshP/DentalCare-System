@@ -1,4 +1,29 @@
-﻿<!DOCTYPE html>
+﻿
+<?php
+session_start();
+
+
+$error = $_SESSION["appointment_error"] ?? "";
+
+
+$old = $_SESSION["old_Records"] ?? [];
+
+unset(
+    $_SESSION["appointment_error"],
+    $_SESSION["old_Records"]
+);
+
+
+function escape($value) {
+    return htmlspecialchars(
+        (string)$value,
+        ENT_QUOTES,
+        "UTF-8"
+    );
+}
+?>
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -106,49 +131,58 @@
                     <div class="col-lg-6">
                         <!-- Name  -->
                         <div class="form-floating mb-3">
-                            <input class="form-control" id="name" name="name" type="text" placeholder=" "/>
+                            <input class="form-control" id="name" name="name" type="text" placeholder=" " value="<?= escape($old["name"] ?? "") ?>"/>
                             <label for="name">Full name</label>
                         </div>
                         <!-- Email  -->
                         <div class="form-floating mb-3">
-                            <input class="form-control"type="text"id="email"name="email"placeholder=" "/>
+                            <input class="form-control"type="text"id="email"name="email"placeholder=" "value="<?= escape($old["email"] ?? "") ?>"/>
                             <label for="email">Email address</label>
                          </div>
                         <!-- Phone  -->
                         <div class="form-floating mb-3">
-                            <input class="form-control" id="phone" name="phone" type="tel" placeholder=" "/>
+                            <input class="form-control" id="phone" name="phone" type="tel" placeholder=" " value="<?= escape($old["phone"] ?? "") ?>"/>
                             <label for="phone">Phone number</label>
                         </div>
                         <!-- Service Selection -->
                         <div class="form-floating mb-3">
                             <select class="form-control" id="service" name="service" >
-                                <option value="">Select Service</option>
-                                <option value="DC" >Dental Checkup</option>
-                                <option value="TC">Teeth Cleaning</option>
-                                <option value="RCT">Root Canal Treatment</option>
-                                <option value="TE">Tooth Extraction</option>
-                                <option value="TW">Teeth Whitening</option>
-                                <option value="TF">Tooth Filling</option>
-                                <option value="BC">Braces Consultation</option>
-                                <option value="EDC">Emergency Dental Consultation</option>
+                                <option value="" <?= (($old["service"] ?? "") === "")? "selected" : "" ?>>Select Service</option>
+                                <option value="DC" <?= (($old["service"] ?? "") === "DC")? "selected" : "" ?>>Dental Checkup</option>
+                                <option value="TC"<?= (($old["service"] ?? "") === "TC")? "selected" : "" ?>>Teeth Cleaning</option>
+                                <option value="RCT"<?= (($old["service"] ?? "") === "RCT")? "selected" : "" ?>>Root Canal Treatment</option>
+                                <option value="TE"<?= (($old["service"] ?? "") === "TE")? "selected" : "" ?>>Tooth Extraction</option>
+                                <option value="TW"<?= (($old["service"] ?? "") === "TW")? "selected" : "" ?>>Teeth Whitening</option>
+                                <option value="TF"<?= (($old["service"] ?? "") === "TF")? "selected" : "" ?>>Tooth Filling</option>
+                                <option value="BC"<?= (($old["service"] ?? "") === "BC")? "selected" : "" ?>>Braces Consultation</option>
+                                <option value="EDC"<?= (($old["service"] ?? "") === "EDC")? "selected" : "" ?>>Emergency Dental Consultation</option>
                             </select>
                             <label for="service">Service</label>
                         </div>
                         <!-- Appointment Date and Time -->
                         <div class="form-floating mb-3">
-                            <input type="datetime-local" class="form-control" id="date" name="date" autocomplete="off" placeholder=" "/>
+                            <input type="datetime-local" class="form-control" id="date" name="date" autocomplete="off" placeholder=" " value="<?= escape($old["date"] ?? "") ?>"/>
                             <label for="date">Date and Time</label>
                         </div>
 
                         <!-- JavaScript Error Message -->
-                         <div class="d-none"
+                       <!--  <div class="d-none"
                              id="submitErrorMessage"
                              role="alert"
                              aria-live="polite">
-                        </div>
+                        </div>-->
 
                           <!-- PHP Server-side Error Message -->
-                      
+                        <?php if ($error !== ""): ?>
+
+                            <div class="server-error" id="message" role="alert">
+                                <strong>Unable to book appointment.</strong>
+                                <p class="mb-0">
+                                    <?= escape($error) ?>
+                                </p>
+                            </div>
+
+                        <?php endif; ?>
 
                         <!-- Book Button -->
                         <div class="d-grid">
@@ -179,43 +213,50 @@
         });
 
 
-        const appointmentForm = document.getElementById("appointmentBooking");
-        const errorMessage = document.getElementById("submitErrorMessage");
+        //const appointmentForm = document.getElementById("appointmentBooking");
+        //const errorMessage = document.getElementById("submitErrorMessage");
 
-        appointmentForm.addEventListener("submit", function (event) {
-            const fullName = document.getElementById("name").value.trim();
-            const email = document.getElementById("email").value.trim();
-            const phone = document.getElementById("phone").value.trim();
-            const service = document.getElementById("service").value;
-            const appointmentDate = document.getElementById("date").value;
+        //appointmentForm.addEventListener("submit", function (event) {
+        //    const fullName = document.getElementById("name").value.trim();
+        //    const email = document.getElementById("email").value.trim();
 
-            let error = "";
+        //    const phone = document.getElementById("phone").value.trim();
+        //    const service = document.getElementById("service").value;
+        //    const appointmentDate = document.getElementById("date").value;
 
-            if (fullName === "") {
-                error = "Please enter your full name.";
-            } else if (email === "" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                error = "Please enter a valid email address.";
-            } else if (!/^\d{7}$/.test(phone)) {
-                error = "Please enter a valid 7-digit contact number.";
-            } else if (service === "") {
-                error = "Please select a service.";
-            } else if (appointmentDate === "") {
-                error = "Please select an appointment date and time.";
-            } else if (new Date(appointmentDate) <= new Date()) {
-                error = "Please select a future appointment date and time.";
-            }
+        //    let error = "";
 
-            if (error !== "") {
-                event.preventDefault();
-                errorMessage.textContent = error;
-                errorMessage.classList.remove("d-none");
-                errorMessage.className = "error";
-                return;
-            }
+        //    if (fullName === "") {
+        //        error = "Please enter your full name.";
+        //    }
+        //    //else if (email === "" || !email.includes("@") || !email.includes(".")) {
+        //    //    error = "Please enter a valid email address.";
+        //    //} 
+        //    else if (email === "" ||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        //        error = "Please enter a valid email address.";
+        //    }
+            
+        //    else if (!/^\d{7}$/.test(phone)) {
+        //        error = "Please enter a valid 7-digit contact number.";
+        //    } else if (service === "") {
+        //        error = "Please select a service.";
+        //    } else if (appointmentDate === "") {
+        //        error = "Please select an appointment date and time.";
+        //    } else if (new Date(appointmentDate) <= new Date()) {
+        //        error = "Please select a future appointment date and time.";
+        //    }
 
-            errorMessage.textContent = "";
-            errorMessage.classList.add("d-none");
-        });
+        //    if (error !== "") {
+        //        event.preventDefault();
+        //        errorMessage.textContent = error;
+        //        errorMessage.classList.remove("d-none");
+        //        errorMessage.className = "error";
+        //        return;
+        //    }
+
+        //    errorMessage.textContent = "";
+        //    errorMessage.classList.add("d-none");
+        //});
 
     </script>
 
